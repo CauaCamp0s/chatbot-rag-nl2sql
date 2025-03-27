@@ -1,0 +1,68 @@
+Dentro do Escopo ✅
+(Questões que o sistema pode responder)
+
+"Quantas ocorrências aéreas houve no centro em janeiro?"
+
+"Liste ocorrências terrestres com status 'pendente'"
+
+"Distribuição de ocorrências por bairro na última semana"
+
+"Total de ocorrências por tipo nos últimos 3 meses"
+
+"Mostre ocorrências abertas na zona norte ordenadas por data"
+
+"Qual o status predominante das ocorrências deste mês?"
+
+"Quantas ocorrências ocorreram entre 01/03 e 15/03?"
+
+Fora do Escopo ❌
+(Questões que o sistema não pode responder)
+
+"Preveja ocorrências para o próximo trimestre" (Análise preditiva)
+
+"Qual é o sentimento nas descrições das ocorrências?" (NLP complexo)
+
+"Compare com dados de outros municípios" (Dados externos)
+
+"Crie um gráfico em PDF com a distribuição" (Geração de arquivos)
+
+"Atualize o status da ocorrência ID 456 para 'resolvido'" (Escrita no banco)
+
+"Qual a relação entre temperatura e ocorrências?" (Dados não estruturados)
+
+"Explique o artigo 145 do código de trânsito" (Conhecimento geral)
+
+Padrão de Funcionamento 🔧
+O sistema é especializado em:
+
+Consultas analíticas em banco de dados
+
+Filtros por: tipo, status, localização, período
+
+Agregações simples: contagens, distribuições, datas extremas
+
+Respostas estruturadas com metadados
+
+Dicas para Perguntas Eficazes 💡
+Especifique critérios temporais:
+"Últimos 7 dias", "2024", "entre março e abril"
+
+Combine múltiplos filtros:
+"Ocorrências aéreas resolvidas no centro"
+
+Use termos do domínio:
+"tipo", "status", "bairro", "período"
+
+Evite ambiguidades:
+❌ "Problemas recentes" → ✅ "Ocorrências dos últimos 3 dias"
+
+Priorize dados quantificáveis:
+"Quantidade", "porcentagem", "distribuição"
+
+Este modelo garante que as perguntas se alinhem com as capacidades de:
+
+Conversão NL para SQL (nl2sqlService.js)
+
+Análise dos resultados (analyzeTypes, analyzeStatus, etc)
+
+Formatação via Gemini (RESPONSE_PROMPT)
