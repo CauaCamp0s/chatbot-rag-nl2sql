@@ -5,4 +5,4 @@ export const RESPONSE_PROMPT = `Converta os resultados SQL em uma resposta natur
 4. Datas relevantes
 5. Detalhes específicos
 
-[SEU FORMATO DE RESPOSTA AQUI...]`;
+`;
