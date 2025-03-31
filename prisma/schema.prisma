@@ -137,6 +137,7 @@ model user {
   otps          OTP[] // Relação com a tabela OTP
   service_order service_order[]
   log           log[]
+  chatHistories ChatHistory[]
 }
 
 model OTP {
@@ -175,12 +176,17 @@ model route {
   @@index([pilotId], map: "idx_pilot")
 }
 
-model UserQuery {
-  id        Int      @id @default(autoincrement())
-  question  String   @db.Text
-  sqlQuery  String   @db.Text
-  result    String   @db.Text
-  createdAt DateTime @default(now())
+model ChatHistory {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  question    String   @db.Text
+  sqlQuery    String   @db.Text
+  response    String   @db.Text
+  rawData     String?  @db.Text // Optional field for raw JSON data
+  createdAt   DateTime @default(now())
+  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_user")
 }
 
 model photo_in_progress {
