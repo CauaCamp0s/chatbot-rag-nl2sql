@@ -1,24 +1,37 @@
 export const VALIDATION_PROMPT = `
 ANÁLISE DE ESCOPO - Responda apenas "VALID" ou "OFFTOPIC"
-
 Considere como VÁLIDAS perguntas sobre:
-- Ocorrências aéreas/terrestres (FioEmaranhado, BuracoNaRua, etc.)
+- Ocorrências aéreas/terrestres (FioEmaranhado, BuracoNaRua,CalcadaIrregular, Drenagem e MeioFio)
 - Ordens de serviço (aéreas/terrestres)
 - Pilotos (atribuições, performance)
 - Usuários do sistema
 - Registros de atividade/logs
-- Status (Pendente, Resolvido, EmAnalise, EmAndamento)
+- Status (Pendente, Resolvido, EmAnalise, EmAndamento, EmFila)
+- Análises estatísticas (contagens, status predominantes, tendências)
 - Localizações (bairros, zonas)
-- Períodos temporais (datas, meses)
+- Períodos temporais (datas, meses, anos)
+- Relacionamentos entre entidades
 
 Exemplos VÁLIDOS:
+"Qual o status predominante das ocorrências deste mês?" → "VALID"
 "Quantas ordens tem o piloto X?" → "VALID"
 "Liste usuários ativos" → "VALID"
 "Mostre logs de hoje" → "VALID"
+"Qual bairro tem mais ocorrências?" → "VALID"
+"Mostre a distribuição de status das ocorrências" → "VALID"
 
 Exemplos INVÁLIDOS:
 "Previsão do tempo" → "OFFTOPIC"
 "Como fazer um bolo?" → "OFFTOPIC"
+"Exclua todos os registros" → "OFFTOPIC"
+"Atualize o status da ordem de serviço" → "OFFTOPIC"
+"Qual é a senha do usuário?" → "OFFTOPIC"
+"Altere o status da ocorrência para Resolvido" → "OFFTOPIC"
+
+REGRAS DE VALIDAÇÃO:
+1. A pergunta deve relacionar-se exclusivamente aos dados do sistema
+2. Deve referenciar apenas entidades existentes no banco
+3. Não pode solicitar operações de modificação de dados
 
 Sua análise (responda APENAS "VALID" ou "OFFTOPIC"):
 `;
@@ -317,28 +330,28 @@ enum occurrence_land_status {
 
 enum neighborhood {
   Centro
-  Getúlio_Vargas
+  Getulio_Vargas         @map("Getúlio_Vargas")
   Cirurgia
   Pereira_Lobo
-  Suíssa
+  Suissa                 @map("Suíssa")
   Salgado_Filho
   Treze_de_Julho
   Dezoito_do_Forte
   Palestina
-  Santo_Antônio
+  Santo_Antonio          @map("Santo_Antônio")
   Industrial
   Santos_Dumont
-  José_Conrado_de_Araújo
-  Novo_Paraíso
-  América
+  Jose_Conrado_de_Araujo @map("José_Conrado_de_Araújo")
+  Novo_Paraiso           @map("Novo_Paraíso")
+  America                @map("América")
   Siqueira_Campos
   Soledade
-  Lamarão
+  Lamarao                @map("Lamarão")
   Cidade_Nova
-  Japãozinho
+  Japao_zinho            @map("Japãozinho")
   Porto_Dantas
   Bugio
-  Jardim_Centenário
+  Jardim_Centenario      @map("Jardim_Centenário")
   Olaria
   Capucho
   Jabotiana
@@ -346,16 +359,17 @@ enum neighborhood {
   Luzia
   Grageru
   Jardins
-  Inácio_Barbosa
-  São_Conrado
-  Farolândia
+  Inacio_Barbosa         @map("Inácio_Barbosa")
+  Sao_Conrado            @map("São_Conrado")
+  Farolandia             @map("Farolândia")
   Coroa_do_Meio
   Aeroporto
   Atalaia
   Santa_Maria
-  Zona_de_Expansão
-  São_José
+  Zona_de_Expansao       @map("Zona_de_Expansão")
+  Sao_Jose               @map("São_José")
 }
+
 
 
 LEMBRE-SE QUE O BANCO É MYSQL!!!!!

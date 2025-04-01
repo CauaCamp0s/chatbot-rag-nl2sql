@@ -11,7 +11,7 @@ model photo_air_occcurrences {
   id                Int            @id @default(autoincrement())
   occurrence_air_id Int
   path              String         @db.VarChar(255)
-  occurrence_air    occurrence_air @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  occurrence_air    occurrence_air @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade)
 
   @@index([occurrence_air_id], map: "occurrence_air_id")
 }
@@ -20,7 +20,7 @@ model photos_land_occurrences {
   id                 Int             @id @default(autoincrement())
   occurrence_land_id Int
   path               String          @db.VarChar(255)
-  occurrence_land    occurrence_land @relation(fields: [occurrence_land_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  occurrence_land    occurrence_land @relation(fields: [occurrence_land_id], references: [id], onDelete: Cascade)
 
   @@index([occurrence_land_id], map: "occurrence_land_id")
 }
@@ -42,16 +42,16 @@ model occurrence_air {
   latitude_coordinate    Decimal                         @db.Decimal(10, 6)
   longitude_coordinate   Decimal                         @db.Decimal(10, 6)
   description            String                          @db.Text
-  is_active              Int                             @default(1) // 1 = Ativo, 0 = Inativo
+  is_active              Int                             @default(1)
   neighborhood           neighborhood
   width                  Decimal?                        @db.Decimal(10, 2)
   length                 Decimal?                        @db.Decimal(10, 2)
+  observation            String?                         @db.Text
   pilot                  pilot                           @relation(fields: [pilot_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "occurrence_air_ibfk_1")
+  photo_air_occcurrences photo_air_occcurrences[]
+  photo_in_progress      photo_in_progress[]
   service_order          service_order[]
   videos                 video[]
-  photo_air_occcurrences photo_air_occcurrences[]
-  observation            String?                         @db.Text // Novo campo para observação
-  photo_in_progress      photo_in_progress[]
 
   @@index([pilot_id], map: "pilot_id")
 }
@@ -73,13 +73,13 @@ model occurrence_land {
   latitude_coordinate    Decimal                          @db.Decimal(10, 6)
   longitude_coordinate   Decimal                          @db.Decimal(10, 6)
   description            String                           @db.Text
-  is_active              Int                              @default(1) // 1 = Ativo, 0 = Inativo
+  is_active              Int                              @default(1)
   neighborhood           neighborhood
+  observation            String?                          @db.Text
   pilot                  pilot                            @relation(fields: [pilot_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "occurrence_land_ibfk_1")
-  service_order          service_order[]
-  photo_land_occurrences photos_land_occurrences[]
-  observation            String?                          @db.Text // Novo campo para observação
   photo_in_progress      photo_in_progress[]
+  photo_land_occurrences photos_land_occurrences[]
+  service_order          service_order[]
 
   @@index([pilot_id], map: "pilot_id")
 }
@@ -87,9 +87,11 @@ model occurrence_land {
 model video {
   id                Int            @id @default(autoincrement())
   url               String         @db.VarChar(255)
-  occurrence_air    occurrence_air @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   occurrence_air_id Int
   createdAt         DateTime       @default(now()) @db.DateTime(0)
+  occurrence_air    occurrence_air @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade)
+
+  @@index([occurrence_air_id], map: "video_occurrence_air_id_fkey")
 }
 
 model pilot {
@@ -97,8 +99,8 @@ model pilot {
   name            String            @unique(map: "name") @db.VarChar(255)
   occurrence_air  occurrence_air[]
   occurrence_land occurrence_land[]
-  service_order   service_order[]
   route           route[]
+  service_order   service_order[]
 }
 
 model service_order {
@@ -112,18 +114,18 @@ model service_order {
   occurrence_type         service_order_occurrence_type
   occurrence_type_land    service_order_occurrence_type_land?
   occurrence_type_air     service_order_occurrence_type_air?
-  responsible_id          Int? // Campo opcional: ID do responsável pela OS
-  responsible_assigned_at DateTime? // Campo opcional: Data de atribuição do responsável
+  responsible_id          Int?
+  responsible_assigned_at DateTime?
+  random_code             Int?                                @unique
   pilot                   pilot                               @relation(fields: [pilot_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "service_order_ibfk_1")
   occurrence_land         occurrence_land?                    @relation(fields: [land_occurrence_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "service_order_ibfk_2")
   occurrence_air          occurrence_air?                     @relation(fields: [air_occurrence_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "service_order_ibfk_3")
-  responsible             user?                               @relation(fields: [responsible_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  random_code             Int?                                @unique
+  responsible             user?                               @relation(fields: [responsible_id], references: [id])
 
   @@index([air_occurrence_id], map: "idx_air_occurrence")
   @@index([land_occurrence_id], map: "idx_land_occurrence")
   @@index([pilot_id], map: "pilot_id")
-  @@index([responsible_id], map: "idx_responsible") // Índice para o responsável
+  @@index([responsible_id], map: "idx_responsible")
 }
 
 model user {
@@ -133,22 +135,20 @@ model user {
   name          String          @db.VarChar(255)
   role          String          @db.VarChar(100)
   avatar        String?         @db.VarChar(255)
-  is_active     Int             @default(1) // 1 = Ativo, 0 = Inativo
-  otps          OTP[] // Relação com a tabela OTP
-  service_order service_order[]
-  log           log[]
+  is_active     Int             @default(1)
   chatHistories ChatHistory[]
+  otps          OTP?
+  log           log[]
+  service_order service_order[]
 }
 
 model OTP {
   id        Int      @id @default(autoincrement())
-  code      String // O código OTP
+  code      String
   email     String   @unique
-  expiresAt DateTime // Data de expiração do OTP
+  expiresAt DateTime
   createdAt DateTime @default(now())
-
-  // Relação com a tabela User (opcional, se quiser vincular ao ID do usuário)
-  user user? @relation(fields: [email], references: [email])
+  user      user     @relation(fields: [email], references: [email])
 }
 
 model log {
@@ -156,10 +156,10 @@ model log {
   reason     String   @db.Text
   occurredAt DateTime @db.DateTime(0)
   action     String   @db.Text
-  userId     Int? // Tornando o campo opcional
+  userId     Int?
   ip         String   @db.VarChar(45)
-  route      String   @db.VarChar(255) // Rota (ex: /login, /user)
-  method     String   @db.VarChar(10) // Método HTTP (ex: POST, PUT, DELETE)
+  route      String   @db.VarChar(255)
+  method     String   @db.VarChar(10)
   user       user?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([userId], map: "idx_user")
@@ -177,27 +177,26 @@ model route {
 }
 
 model ChatHistory {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  question    String   @db.Text
-  sqlQuery    String   @db.Text
-  response    String   @db.Text
-  rawData     String?  @db.Text // Optional field for raw JSON data
-  createdAt   DateTime @default(now())
-  user        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  question  String   @db.Text
+  sqlQuery  String   @db.Text
+  response  String   @db.Text
+  rawData   String?  @db.Text
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId], name: "idx_user")
+  @@index([userId], map: "idx_user")
 }
 
 model photo_in_progress {
   id                 Int              @id @default(autoincrement())
-  occurrence_air_id  Int? // Opcional (fotos de ocorrências aéreas)
+  occurrence_air_id  Int?
   path               String           @db.VarChar(255)
-  occurrence_air     occurrence_air?  @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  occurrence_land_id Int? // Opcional (fotos de ocorrências terrestres)
-  occurrence_land    occurrence_land? @relation(fields: [occurrence_land_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  occurrence_land_id Int?
+  occurrence_air     occurrence_air?  @relation(fields: [occurrence_air_id], references: [id], onDelete: Cascade)
+  occurrence_land    occurrence_land? @relation(fields: [occurrence_land_id], references: [id], onDelete: Cascade)
 
-  // Índices para ambos os campos opcionais
   @@index([occurrence_air_id], map: "occurrence_air_id")
   @@index([occurrence_land_id], map: "occurrence_land_id")
 }
@@ -297,28 +296,28 @@ enum occurrence_land_status {
 
 enum neighborhood {
   Centro
-  Getúlio_Vargas
+  Getulio_Vargas         @map("Getúlio_Vargas")
   Cirurgia
   Pereira_Lobo
-  Suíssa
+  Suissa                 @map("Suíssa")
   Salgado_Filho
   Treze_de_Julho
   Dezoito_do_Forte
   Palestina
-  Santo_Antônio
+  Santo_Antonio          @map("Santo_Antônio")
   Industrial
   Santos_Dumont
-  José_Conrado_de_Araújo
-  Novo_Paraíso
-  América
+  Jose_Conrado_de_Araujo @map("José_Conrado_de_Araújo")
+  Novo_Paraiso           @map("Novo_Paraíso")
+  America                @map("América")
   Siqueira_Campos
   Soledade
-  Lamarão
+  Lamarao                @map("Lamarão")
   Cidade_Nova
-  Japãozinho
+  Japao_zinho            @map("Japãozinho")
   Porto_Dantas
   Bugio
-  Jardim_Centenário
+  Jardim_Centenario      @map("Jardim_Centenário")
   Olaria
   Capucho
   Jabotiana
@@ -326,13 +325,13 @@ enum neighborhood {
   Luzia
   Grageru
   Jardins
-  Inácio_Barbosa
-  São_Conrado
-  Farolândia
+  Inacio_Barbosa         @map("Inácio_Barbosa")
+  Sao_Conrado            @map("São_Conrado")
+  Farolandia             @map("Farolândia")
   Coroa_do_Meio
   Aeroporto
   Atalaia
   Santa_Maria
-  Zona_de_Expansão
-  São_José
+  Zona_de_Expansao       @map("Zona_de_Expansão")
+  Sao_Jose               @map("São_José")
 }
